@@ -1,0 +1,122 @@
+
+cd root 回到root目录
+
+mkdir /etc/apt/keyrings
+
+wget -qO - https://apt.v2raya.org/key/public-key.asc | sudo tee /etc/apt/keyrings/v2raya.asc
+
+echo "deb [signed-by=/etc/apt/keyrings/v2raya.asc] https://apt.v2raya.org/ v2raya main" | sudo tee /etc/apt/sources.list.d/v2raya.list
+
+sudo apt update
+
+sudo apt install v2raya v2ray   如果网络不好，下载的时间会很慢
+
+#将下面的配置文件copy到 /etc/v2ray/config.json : 
+
+{
+    "inbounds": [
+        {
+            "port": 1080,
+            "protocol": "socks",
+            "settings": {
+                "auth": "noauth"
+            },
+            "tag": "socks-in"
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vmess",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "54.201.109.211", # v2ray 服务器 ipaddress
+                        "port": 34513,               # v2ray 服务器 port
+                        "users": [
+                            {
+                                "id": "9f584a77-dd23-4fa7-b961-5565e1b597bc",  # v2ray 服务器 用户id
+                                "alterId": 0
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "routing": {
+        "rules": [
+            {
+                "type": "field",
+                "inboundTag": ["socks-in"],
+                "outboundTag": "vmess-out"
+            }
+        ]
+    }
+}
+
+
+sudo systemctl enable v2raya.service --now  启动v2rayA
+
+
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+# Install Docker
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Enable and start Docker service
+sudo systemctl enable docker --now
+
+
+
+#安装完docker设置docker代理:
+vi /etc/systemd/system/docker.service.d/http-proxy.conf
+
+[Service]
+Environment="HTTP_PROXY=socks5://192.168.122.2:1080"
+Environment="HTTPS_PROXY=socks5://192.168.122.2:1080"
+
+
+
+#设置docker容器代理:
+vi ~/.docker/config.json
+
+{
+    "proxies": {
+        "default": {
+            "httpProxy": "socks5://192.168.122.2:1080/",
+            "httpsProxy": "socks5://192.168.122.2:1080/",
+            "noProxy": "*.test.example.com,.example.org,127.0.0.0/8"
+        }
+    }
+}
+
+systemctl daemon-reload
+
+systemctl restart docker
+
+sudo apt install curl
+
+curl -L https://github.com/ionet-official/io-net-official-setup-script/raw/main/ionet-setup.sh -o ionet-setup.sh
+
+chmod +x ionet-setup.sh && ./ionet-setup.sh
+
+curl -L https://github.com/ionet-official/io_launch_binaries/raw/main/launch_binary_linux -o launch_binary_linux
+
+chmod +x launch_binary_linux
+
+./launch_binary_linux --device_id=c07bba05-12ac-49b2-9afd-cb6c92eb5ed1 --user_id=5ef84ecd-90da-4a33-aa70-c4805b1cd002 --operating_system="Linux" --usegpus=true --device_name=1
+
+
+#等待20分钟之后就可以连接成功
