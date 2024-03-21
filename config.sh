@@ -88,7 +88,10 @@ sudo systemctl restart v2ray
 echo "export ALL_PROXY=socks5://127.0.0.1:1080" | sudo tee -a /etc/profile
 
 # Source /etc/profile
+
 source /etc/profile
+
+curl https://ipinfo.io
 
 echo "配置文件已生成并保存到 /usr/local/etc/v2ray/config.json"
 echo "v2ray 服务已重新启动，并已将代理设置添加到 /etc/profile。"
