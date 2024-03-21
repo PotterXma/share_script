@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2268
 
-apt install -y curl
 
 # The files installed by the script conform to the Filesystem Hierarchy Standard:
 # https://wiki.linuxfoundation.org/lsb/fhs
