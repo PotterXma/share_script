@@ -43,14 +43,18 @@ read -p "请输入您的用户ID: " user_id
 config_template='{
   "inbounds": [
     {
-      "port": 1080,
-      "protocol": "socks",
-      "sniffing": {
-        "enabled": true,
-        "destOverride": ["http", "tls"]
-      },
+      "port": 2017,
+      "protocol": "vmess",
       "settings": {
-        "auth": "noauth"
+        "clients": [
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+            "alterId": 64
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp"
       }
     }
   ],
