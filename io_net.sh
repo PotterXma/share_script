@@ -1,19 +1,16 @@
 #!/bin/bash
 
-# 提示用户输入 V2Ray 服务器的 IP 地址
-while [ -z "$v2ray_address" ]; do
-    read -p "请输入 V2Ray 服务器的 IP 地址: " v2ray_address
-done
+# 读取配置文件
+config_file="config"
 
-# 提示用户输入 V2Ray 服务器的端口号
-while [ -z "$v2ray_port" ]; do
-    read -p "请输入 V2Ray 服务器的端口号: " v2ray_port
-done
-
-# 提示用户输入 V2Ray 服务器的用户 ID
-while [ -z "$v2ray_id" ]; do
-    read -p "请输入 V2Ray 服务器的用户 ID: " v2ray_id
-done
+if [ -f "$config_file" ]; then
+    v2ray_address=$(sed -n '1p' "$config_file")
+    v2ray_port=$(sed -n '2p' "$config_file")
+    v2ray_id=$(sed -n '3p' "$config_file")
+else
+    echo "配置文件 '$config_file' 不存在。请确保文件存在并包含正确的信息。"
+    exit 1
+fi
 
 # 安装 V2Ray
 # Add V2Ray's official GPG key
