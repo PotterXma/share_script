@@ -28,6 +28,8 @@ else
     exit 1
 fi
 
+mkdir /etc/v2ray/
+
 # 配置文件内容
 config_json=$(cat <<EOF
 {
