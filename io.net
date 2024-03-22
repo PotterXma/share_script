@@ -1,18 +1,31 @@
+#!/bin/bash
 
-cd root 回到root目录
+# 安装 V2Ray
+# Add V2Ray's official GPG key
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://apt.v2raya.org/key/public-key.asc -o /etc/apt/keyrings/v2raya.asc
+sudo chmod a+r /etc/apt/keyrings/v2raya.asc
 
-mkdir /etc/apt/keyrings
+# Add the repository to Apt sources
+echo "deb [signed-by=/etc/apt/keyrings/v2raya.asc] https://apt.v2raya.org/ v2raya main" | sudo tee /etc/apt/sources.list.d/v2raya.list > /dev/null
+sudo apt-get update
 
-wget -qO - https://apt.v2raya.org/key/public-key.asc | sudo tee /etc/apt/keyrings/v2raya.asc
+# Install V2Ray
+sudo apt-get install -y v2raya v2ray
 
-echo "deb [signed-by=/etc/apt/keyrings/v2raya.asc] https://apt.v2raya.org/ v2raya main" | sudo tee /etc/apt/sources.list.d/v2raya.list
+# 提示用户输入 V2Ray 服务器的 IP 地址
+read -p "请输入 V2Ray 服务器的 IP 地址: " v2ray_address
 
-sudo apt update
+# 提示用户输入 V2Ray 服务器的端口号
+read -p "请输入 V2Ray 服务器的端口号: " v2ray_port
 
-sudo apt install v2raya v2ray   如果网络不好，下载的时间会很慢
+# 提示用户输入 V2Ray 服务器的用户 ID
+read -p "请输入 V2Ray 服务器的用户 ID: " v2ray_id
 
-#将下面的配置文件copy到 /etc/v2ray/config.json : 
-
+# 配置文件内容
+config_json=$(cat <<EOF
 {
     "inbounds": [
         {
@@ -30,11 +43,11 @@ sudo apt install v2raya v2ray   如果网络不好，下载的时间会很慢
             "settings": {
                 "vnext": [
                     {
-                        "address": "54.201.109.211", # v2ray 服务器 ipaddress
-                        "port": 34513,               # v2ray 服务器 port
+                        "address": "$v2ray_address",
+                        "port": $v2ray_port,
                         "users": [
                             {
-                                "id": "9f584a77-dd23-4fa7-b961-5565e1b597bc",  # v2ray 服务器 用户id
+                                "id": "$v2ray_id",
                                 "alterId": 0
                             }
                         ]
@@ -53,70 +66,54 @@ sudo apt install v2raya v2ray   如果网络不好，下载的时间会很慢
         ]
     }
 }
+EOF
+)
 
+# 将配置文件写入 /etc/v2ray/config.json
+echo "$config_json" | sudo tee /etc/v2ray/config.json > /dev/null
 
-sudo systemctl enable v2raya.service --now  启动v2rayA
+# 启动 v2ray 服务
+sudo systemctl enable v2raya.service --now
 
+echo "V2Ray 已成功配置并启动。"
 
-# Add Docker's official GPG key:
+# 安装 Docker
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get install -y ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update
-
-# Install Docker
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Enable and start Docker service
-sudo systemctl enable docker --now
+# 获取本机 IP 地址
+local_ip=$(hostname -I | awk '{print $1}')
 
-
-
-#安装完docker设置docker代理:
-vi /etc/systemd/system/docker.service.d/http-proxy.conf
-
+# 添加 Docker 的代理设置到 systemd 配置文件
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf > /dev/null <<EOF
 [Service]
-Environment="HTTP_PROXY=socks5://192.168.122.2:1080"
-Environment="HTTPS_PROXY=socks5://192.168.122.2:1080"
+Environment="HTTP_PROXY=socks5://$local_ip:1080"
+Environment="HTTPS_PROXY=socks5://$local_ip:1080"
+EOF
 
+# 重载 systemd 配置
+sudo systemctl daemon-reload
 
-
-#设置docker容器代理:
-vi ~/.docker/config.json
-
+# 创建 Docker 配置文件
+mkdir -p ~/.docker
+tee ~/.docker/config.json > /dev/null <<EOF
 {
     "proxies": {
         "default": {
-            "httpProxy": "socks5://192.168.122.2:1080/",
-            "httpsProxy": "socks5://192.168.122.2:1080/",
+            "httpProxy": "socks5://$local_ip:1080/",
+            "httpsProxy": "socks5://$local_ip:1080/",
             "noProxy": "*.test.example.com,.example.org,127.0.0.0/8"
         }
     }
 }
+EOF
 
-systemctl daemon-reload
+# 启动 Docker 并设置为开机自启
+sudo systemctl enable docker --now
 
-systemctl restart docker
-
-sudo apt install curl
-
-curl -L https://github.com/ionet-official/io-net-official-setup-script/raw/main/ionet-setup.sh -o ionet-setup.sh
-
-chmod +x ionet-setup.sh && ./ionet-setup.sh
-
-curl -L https://github.com/ionet-official/io_launch_binaries/raw/main/launch_binary_linux -o launch_binary_linux
-
-chmod +x launch_binary_linux
-
-./launch_binary_linux --device_id=c07bba05-12ac-49b2-9afd-cb6c92eb5ed1 --user_id=5ef84ecd-90da-4a33-aa70-c4805b1cd002 --operating_system="Linux" --usegpus=true --device_name=1
-
-
-#等待20分钟之后就可以连接成功
+echo "Docker 代理设置完成。"
