@@ -700,6 +700,16 @@ EOF
 # 将配置文件写入 /usr/local/etc/v2ray/config.json
 echo "$config_json" | sudo tee /usr/local/etc/v2ray/config.json > /dev/null
 
+
+# 创建新用户
+sudo adduser --disabled-password --gecos "123" v2rayuser
+
+# 编辑 V2Ray 服务配置文件
+sudo sed -i 's/User=nobody/User=v2rayuser/g' /etc/systemd/system/v2ray.service
+
+# 重新加载 systemd 服务配置
+sudo systemctl daemon-reload
+
 # 启动 v2ray 服务
 sudo systemctl enable v2raya.service --now
 
