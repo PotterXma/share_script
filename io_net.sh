@@ -1,27 +1,18 @@
 #!/bin/bash
 
 # 提示用户输入 V2Ray 服务器的 IP 地址
-while true; do
+while [ -z "$v2ray_address" ]; do
     read -p "请输入 V2Ray 服务器的 IP 地址: " v2ray_address
-    if [ -n "$v2ray_address" ]; then
-        break
-    fi
 done
 
 # 提示用户输入 V2Ray 服务器的端口号
-while true; do
+while [ -z "$v2ray_port" ]; do
     read -p "请输入 V2Ray 服务器的端口号: " v2ray_port
-    if [ -n "$v2ray_port" ]; then
-        break
-    fi
 done
 
 # 提示用户输入 V2Ray 服务器的用户 ID
-while true; do
+while [ -z "$v2ray_id" ]; do
     read -p "请输入 V2Ray 服务器的用户 ID: " v2ray_id
-    if [ -n "$v2ray_id" ]; then
-        break
-    fi
 done
 
 # 安装 V2Ray
@@ -84,8 +75,8 @@ config_json=$(cat <<EOF
 EOF
 )
 
-# 将配置文件写入 /etc/v2raya/config.json
-echo "$config_json" | sudo tee /etc/v2raya/config.json > /dev/null
+# 将配置文件写入 /etc/v2ray/config.json
+echo "$config_json" | sudo tee /etc/v2ray/config.json > /dev/null
 
 # 启动 v2ray 服务
 sudo systemctl enable v2raya.service --now
