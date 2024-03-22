@@ -697,8 +697,8 @@ config_json=$(cat <<EOF
 EOF
 )
 
-# 将配置文件写入 /etc/v2ray/config.json
-echo "$config_json" | sudo tee /etc/v2ray/config.json > /dev/null
+# 将配置文件写入 /usr/local/etc/v2ray/config.json
+echo "$config_json" | sudo tee /usr/local/etc/v2ray/config.json > /dev/null
 
 # 启动 v2ray 服务
 sudo systemctl enable v2raya.service --now
