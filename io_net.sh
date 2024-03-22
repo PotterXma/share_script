@@ -54,12 +54,12 @@ config_json=$(cat <<EOF
                         "users": [
                             {
                                 "id": "$v2ray_id",
-                                "alterId": 64
+                                "alterId": 64,
+                                "security": "auto"
                             }
                         ]
                     }
-                ],
-                "security": "auto"
+                ]
             }
         }
     ],
