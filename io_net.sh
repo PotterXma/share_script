@@ -45,6 +45,7 @@ config_json=$(cat <<EOF
     "outbounds": [
         {
             "protocol": "vmess",
+            "tag": "vmess-out", // 添加出站标签
             "settings": {
                 "vnext": [
                     {
@@ -72,6 +73,7 @@ config_json=$(cat <<EOF
         ]
     }
 }
+
 EOF
 )
 
