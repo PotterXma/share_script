@@ -101,7 +101,7 @@ sudo systemctl daemon-reload
 
 # 创建 Docker 配置文件
 mkdir -p ~/.docker
-tee ~/.docker/config.json > /dev/null <<EOF
+cat <<EOF > ~/.docker/config.json
 {
     "proxies": {
         "default": {
