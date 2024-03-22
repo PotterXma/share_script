@@ -129,5 +129,5 @@ EOF
 
 # 启动 Docker 并设置为开机自启
 sudo systemctl enable docker --now
-
+sudo systemctl restart v2raya.service
 echo "Docker 代理设置完成。"
